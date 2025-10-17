@@ -130,7 +130,7 @@ def gerar_graficos_com_simulacoes_reais():
     plt.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('graficos_dados_reais.png', dpi=300, bbox_inches='tight')
+    plt.savefig('graphs.png', dpi=300, bbox_inches='tight')
     plt.show()
 
 if __name__ == "__main__":
