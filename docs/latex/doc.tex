@@ -268,7 +268,7 @@ O método mostrou-se robusto e confiável dentro dos parâmetros de estabilidade
 
 \newpage
 \appendix
-\section*{Anexo A – Código-Fonte}
+\section*{Anexo – Código-Fonte}
 \addcontentsline{toc}{section}{Anexo A – Código-Fonte}
 
 \subsection*{Implementação do Método Backward Difference (Python)}
@@ -276,7 +276,6 @@ O método mostrou-se robusto e confiável dentro dos parâmetros de estabilidade
 O código a seguir apresenta a implementação do método \textit{Backward Difference} utilizada para as simulações do relatório.
 
 \begin{minted}[fontsize=\footnotesize,
-               linenos,
                breaklines,
                frame=single,
                bgcolor=white]{python}
@@ -341,6 +340,51 @@ def backward_difference_real(h, T=1.0):
     return error, k, Nt, x, U, u_exact
 \end{minted}
 
+\newpage
+
+\subsection*{Implementação do Método Forward Difference (Python)}
+
+O código a seguir apresenta a implementação do método \textit{Forward Difference} utilizada para as simulações
+\begin{minted}[fontsize=\footnotesize,
+               breaklines,
+               frame=single,
+               bgcolor=white]{python}
+    def forward_difference_real(h, T=1.0):
+    """
+    Implementacao REAL do metodo Forward Difference
+    """
+    # Malha espacial
+    Nx = int(1.0 / h)
+    x = np.linspace(0, 1, Nx + 1)
+
+    # Criterio de estabilidade
+    k = 0.99 * 0.5 * h**2
+    Nt = int(T / k)
+    k = T / Nt  # Ajuste para chegar exatamente em T=1
+    r = k / h**2
+
+    print(f"h={h:.4f}, k={k:.6f}, Nt={Nt}, r={r:.4f}")
+
+    # Condicao inicial
+    U = exact_solution(x, 0)
+
+    # Loop temporal
+    for n in range(Nt):
+        t = n * k
+        U_new = U.copy()
+
+        # Aplicar o esquema para pontos internos
+        for i in range(1, Nx):
+            U_new[i] = U[i] + r * (U[i-1] - 2*U[i] + U[i+1]) + k * source_term(x[i], t)
+
+        U = U_new
+
+    # Calcular erro
+    u_exact = exact_solution(x, T)
+    error = np.sqrt(h * np.sum((U[1:Nx] - u_exact[1:Nx])**2))
+
+    return error, k, Nt, x, U, u_exact
+\end{minted}
 
 
 \end{document}
