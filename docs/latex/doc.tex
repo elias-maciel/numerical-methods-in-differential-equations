@@ -17,6 +17,7 @@
 \usepackage{hyperref}
 \usepackage{mathpazo}
 \usepackage{natbib}
+\usepackage{caption}
 \usepackage{subcaption}
 \usepackage{etoolbox}
 \usepackage{pdfx}
@@ -25,6 +26,8 @@
 \usepackage{listings}
 \usepackage{float}
 \usepackage[font=small,labelfont=bf,labelsep=period,justification=centering]{caption}
+\usepackage{minted}
+\usemintedstyle{xcode} % 'friendly' ou 'monokai', 'vs', 'xcode'
 
 \graphicspath{{./}}
 
@@ -67,7 +70,7 @@
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[L]{%
-  \raisebox{0.1cm}{\includegraphics[height=0.8cm]{imgs/logo}}%
+  \raisebox{0.1cm}{\includegraphics[height=0.8cm]{logo}}%
 }
 \fancyhead[R]{%
   \vspace{0.15cm}\small\textit{MAP2320 - Métodos Numéricos em Equações Diferenciais II}%
@@ -76,12 +79,13 @@
 \titleformat{\section}{\large\bfseries\sffamily}{\thesection.}{0.5em}{\underline}
 \titleformat{\subsection}{\normalsize\bfseries\sffamily}{\thesubsection}{0.5em}{}
 
-\title{\textbf{\Large Análise Numérica de Métodos de Diferenças Finitas para uma EDP Parabólica: Comparação entre Forward Difference e Crank–Nicolson}\\
-\vspace{0.2cm}
-\large Instituto de Matemática, Estatística e Ciência da Computação}
+\title{
+\large Instituto de Matemática, Estatística e Ciência da Computação\\\vspace{0.2cm}
+\textbf{\Large Análise Numérica de Métodos de Diferenças Finitas para uma EDP Parabólica: Comparação entre Forward Difference e Crank–Nicolson}
+}
 
 \author{
-    Edoardo\\ 
+    Edoardo\\
     Elias Fernando Maciel\\
     Marcos \\
     Rodrigo \\
@@ -162,10 +166,11 @@ Dado o problema de condições de contorno de Dirichlet resultante, aplicaram-se
 
 \begin{table}[H]
 \centering
+
 \resizebox{\linewidth}{!}{
 \begin{tabular}{cccccc}
 \hline
-$h$ & $k$ & $N_t$ & $k/h^2$ & Erro $L^2$ & Taxa de Conv. \\ 
+$h$ & $k$ & $N_t$ & $k/h^2$ & Erro $L^2$ & Taxa de Conv. \\
 \hline
 0.1000 & 0.004926 & 203 & 0.4926 & $1.37\times10^{-3}$ & -- \\
 0.0500 & 0.001238 & 808 & 0.4952 & $3.42\times10^{-4}$ & 2.00 \\
@@ -174,14 +179,18 @@ $h$ & $k$ & $N_t$ & $k/h^2$ & Erro $L^2$ & Taxa de Conv. \\
 \end{tabular}
 }
 \caption{\small Resultados do método Forward Difference para diferentes refinamentos de malha}
+\label{tab:convergencia}
 \end{table}
 
 \section{Análise Gráfica}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=1.0\linewidth]{imgs/graphs}
-\caption{Resultados das simulações numéricas: (a) Convergência do erro, (b) Comparação entre soluções numérica e analítica, (c) Relação entre os passos espacial e temporal}
+\includegraphics[width=1.0\linewidth]{graficos_dados_reais.png}
+\caption{Resultados das simulações numéricas:\\
+1. Convergência do erro\\
+2. Comparação entre soluções numérica e analítica\\
+3. Relação entre os passos espacial e temporal}
 \label{fig:resultados}
 \end{figure}
 
@@ -228,7 +237,7 @@ Esta relação é fundamental para garantir que erros numéricos não amplifique
 
 \subsection{Convergência e Precisão}
 
-Os resultados da Tabela \ref{tab:convergencia} confirmam a convergência de segunda ordem do método Forward Difference. A taxa de convergência calculada de aproximadamente 2.0 indica que o método está operando dentro das expectativas teóricas.
+Os resultados da \autoref{tab:convergencia} confirmam a convergência de segunda ordem do método Forward Difference. A taxa de convergência calculada de aproximadamente 2.0 indica que o método está operando dentro das expectativas teóricas.
 
 \subsection{Eficiência Computacional}
 
@@ -238,6 +247,7 @@ Observa-se que o número de passos temporais $N_t$ aumenta significativamente co
 
 A seleção conservadora de $k = 0.99 \times \frac{1}{2}h^2$ garantiu estabilidade em todas as simulações, com $k/h^2$ mantendo-se consistentemente abaixo do limite crítico de 0.5.
 
+\newpage
 \section{Conclusão}
 
 A implementação do método Forward Difference demonstrou ser eficaz para a resolução da EDP parabólica em estudo. Os resultados numéricos validam:
@@ -250,5 +260,87 @@ A implementação do método Forward Difference demonstrou ser eficaz para a res
 \end{itemize}
 
 O método mostrou-se robusto e confiável dentro dos parâmetros de estabilidade estabelecidos, fornecendo soluções numéricas consistentes com a solução analítica.
+
+\section{Referências}
+\begin{itemize}
+  \item Notas de aula da disciplina MAP2320 - USP (2025).
+\end{itemize}
+
+\newpage
+\appendix
+\section*{Anexo A – Código-Fonte}
+\addcontentsline{toc}{section}{Anexo A – Código-Fonte}
+
+\subsection*{Implementação do Método Backward Difference (Python)}
+
+O código a seguir apresenta a implementação do método \textit{Backward Difference} utilizada para as simulações do relatório.
+
+\begin{minted}[fontsize=\footnotesize,
+               linenos,
+               breaklines,
+               frame=single,
+               bgcolor=white]{python}
+import numpy as np
+
+def exact_solution(x, t):
+    return np.exp(-np.pi**2 * t) * np.sin(np.pi * x)
+
+def backward_difference_real(h, T=1.0):
+    """
+    Implementacao REAL do metodo Backward Difference
+    """
+    # Malha espacial
+    Nx = int(1.0 / h)
+    x = np.linspace(0, 1, Nx + 1)
+    # mesma inicializacao do forward difference
+
+    # Apesar de incondicionalmente estavel, estamos mantendo a malha em dimensoes identicas
+    # Estamos fazendo isso para manter uma consistencia de erros com os mesmos tamanhos delta-t
+    # Visando um Crank-Nicolson coerente
+    k = 0.99 * 0.5 * h**2
+    Nt = int(T / k)
+    k = T / Nt  # Ajuste para chegar exatamente em T=1
+    r = k / h**2
+
+    print(f"h={h:.4f}, k={k:.6f}, Nt={Nt}")
+
+    # Condicao inicial
+    U = exact_solution(x, 0)
+
+    # Resolvendo o sistema como o pseudocodigo apresentado nos slides da aula 10
+    lower = np.zeros(Nx+1)
+    upper = np.zeros(Nx+1)
+    z = np.zeros(Nx+1)
+
+    lower[1] = 1+2*r
+    upper[1] = -r/lower[1]
+    for i in range(2, Nx-1):
+        lower[i] = 1+2*r+r*upper[i-1]
+        upper[i] = -r/lower[i]
+    lower[Nx] = 1+2*r+r*upper[Nx-1]
+
+    for j in range(1, Nt):
+        t = j*k
+        U_new = U.copy()
+        z[1] = U_new[1]/lower[1]
+
+        for i in range(2, Nx):
+            z[i] = (U_new[i]+r*z[i-1])/lower[i]
+
+        U_new[Nx] = z[Nx]
+
+        for i in range(Nx-1, 1):
+            U_new[i] = z[i]-upper[i]*U_new[i+1]
+
+        U = U_new
+
+    # Calcular erro
+    u_exact = exact_solution(x, T)
+    error = np.sqrt(h * np.sum((U[1:Nx] - u_exact[1:Nx])**2))
+
+    return error, k, Nt, x, U, u_exact
+\end{minted}
+
+
 
 \end{document}
